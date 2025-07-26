@@ -1,17 +1,15 @@
 const express=require("express");
 const app=express();
-app.use("/test",(req,res)=>{
-    res.send("Hello I am from test");
+app.get("/user",(req,res)=>{
+    res.send("Hello I am from user");
 });
-app.use("/hello",(req,res)=>{
-    res.send("Hello I am from hello");
+app.post("/user",(req,res)=>{
+    res.send("Data succesfully saved into the dataBase from user");
 });
-app.use("/home",(req,res)=>{
-    res.send("Hello I am from home");
+app.delete("/user",(req,res)=>{
+    res.send("Data succesfully deleted from the dataBase from user");
 });
-app.use("/profile",(req,res)=>{
-    res.send("Hello I am from profile page");
-});
+
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
