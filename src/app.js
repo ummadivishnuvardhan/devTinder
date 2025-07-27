@@ -1,19 +1,25 @@
+
 const express=require("express");
 const app=express();
-app.get("/user",(req,res,next)=>{
-     console.log("I'm fromm the first Route");
+const {checkadmin,checkuser}=require("./middleware/auth");
+app.use("/admin",checkadmin)
+app.get("/admin/getData",(req,res,next)=>{
+     
   
-    // res.send("I think I might come before second Response");
-    next();
-},
+    res.send("Data succesfully retrieved");
+});
+app.get("/admin/delete",(req,res,next)=>{
+    
+  
+    res.send("deleted succesfully");
+});
+app.use("/user",checkuser);
+app.get("/user/getdata",
 (req,res,next)=>{
-    console.log("I'm fromm the second Route");
-    // res.send("hey I am the Response");
-    next();
-},
-(req,res,next)=>{
-    console.log("I'm fromm the third Route");
-    res.send("hey I am the Response");
+    
+
+ res.send("hey I am the Response");
+    
 });
 
 
