@@ -1,28 +1,30 @@
+const express = require("express");
+const connectDB = require("./config/database");
+const User = require("./models/user");
 
-const express=require("express");
-const app=express();
-const {checkadmin,checkuser}=require("./middleware/auth");
-app.use("/admin",checkadmin)
-app.get("/admin/getData",(req,res,next)=>{
-     
-  
-    res.send("Data succesfully retrieved");
-});
-app.get("/admin/delete",(req,res,next)=>{
-    
-  
-    res.send("deleted succesfully");
-});
-app.use("/user",checkuser);
-app.get("/user/getdata",
-(req,res,next)=>{
-    
+const app = express();
+app.use(express.json()); // Required to parse JSON body from requests
 
- res.send("hey I am the Response");
-    
+app.post("/signup", async (req, res) => {
+    // console.log(req.body);
+    // Assuming req.body contains user data, you can create a new user instance
+    try {
+        const user = new User(req.body);
+
+        await user.save();
+        res.send("User created Successfully");
+    } catch (error) {
+        res.status(500).send("Error creating user: " + error.message);
+    }
 });
 
-
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
-});
+connectDB()
+    .then(() => {
+        console.log("Database connection established successfully");
+        app.listen(3000, () => {
+            console.log("Server is running on port 3000");
+        });
+    })
+    .catch((error) => {
+        console.error("Error connecting to the database:", error);
+    });
