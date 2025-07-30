@@ -5,6 +5,7 @@ const User = require("./models/user");
 const app = express();
 app.use(express.json()); // Required to parse JSON body from requests
 
+//finding a single user from the dataBase by emailId
 app.get("/feedbyemailid",async (req,res)=>{
     const emailId=req.body.emailId;
     // Assuming you want to fetch a user by emailId
@@ -22,6 +23,7 @@ app.get("/feedbyemailid",async (req,res)=>{
     }
 });
 
+//finding all users from the dataBase
 app.get("/feed",async (req,res)=>{
     // Assuming you want to fetch all users from the database
     try{
@@ -41,6 +43,23 @@ app.get("/feed",async (req,res)=>{
   
 })
 
+//Deleting a user from the dataBase
+app.delete("/deleteUser",async (req,res)=>{
+    const userId=req.body.userId;
+    try{
+        const user=await User.findByIdAndDelete(userId);
+        if(!user){
+            return res.status(404).send("Something went wrong,No user found");
+        }
+        console.log("User deleted successfully:", user);
+        res.json(user);
+    }catch(error){
+        console.error("Error deleting user:", error);
+        res.status(500).send("Error deleting user");
+    }
+})
+
+//Adding a new User to the dataBase
 app.post("/signup", async (req, res) => {
     // console.log(req.body);
     // Assuming req.body contains user data, you can create a new user instance
@@ -53,6 +72,11 @@ app.post("/signup", async (req, res) => {
         res.status(500).send("Error creating user: " + error.message);
     }
 });
+
+//Updating a user in the dataBase
+
+
+
 
 connectDB()
     .then(() => {
