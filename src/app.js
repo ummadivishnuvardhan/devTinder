@@ -1,6 +1,9 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {validateSignUpData} = require("./utils/validator");
+const bccrpy=require("bcrypt");
+
 
 const app = express();
 app.use(express.json()); // Required to parse JSON body from requests
@@ -61,15 +64,30 @@ app.delete("/deleteUser",async (req,res)=>{
 
 //Adding a new User to the dataBase
 app.post("/signup", async (req, res) => {
-    // console.log(req.body);
+    
     // Assuming req.body contains user data, you can create a new user instance
     try {
-        const user = new User(req.body);
+        //validating the signUp data
+        validateSignUpData(req); 
+
+        const {firstName,lastName,age,email,password} = req.body;
+
+        // Hashing the password before saving it to the database
+        const hashedPassword = await bccrpy.hash(password, 10);
+       
+
+        const user = new User({
+            firstName,
+            lastName,
+            age,
+            email,
+            password: hashedPassword,
+        });
 
         await user.save();
         res.send("User created Successfully");
     } catch (error) {
-        res.status(500).send("Error creating user: " + error.message);
+        res.status(500).send("Error " + error.message);
     }
 });
 

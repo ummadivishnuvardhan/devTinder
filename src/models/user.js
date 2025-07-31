@@ -5,6 +5,7 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
+        minlength:3,
         maxlength:50, 
         validate(value) {
              if (!/^[A-Za-z]+(?: [A-Za-z]+)?$/.test(value)) {
