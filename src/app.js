@@ -74,7 +74,23 @@ app.post("/signup", async (req, res) => {
 });
 
 //Updating a user in the dataBase
-
+app.patch("/updateUser", async (req, res) => {
+    const userId=req.body.userId;
+    const updateData = req.body; // Assuming updateData contains the fields to be updated
+    
+    try{
+        const user = await User.findByIdAndUpdate(userId, updateData,{new: true});
+        validators:true;
+        if(!user){
+            return res.status(404).send("Something went wrong,No user found");
+        }
+        console.log("User updated successfully:", user);
+        res.json(user);
+    }catch(error){
+        console.error("Error updating user:", error);
+        res.status(500).send("Error updating user: " + error.message);
+    }
+});
 
 
 

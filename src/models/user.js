@@ -3,27 +3,62 @@ const mongoose=require('mongoose');
 const userSchema=new mongoose.Schema({
     firstName:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
+        maxlength:50, 
+        validate(value) {
+             if (!/^[A-Za-z]+(?: [A-Za-z]+)?$/.test(value)) {
+                 throw new Error("First name must contain only letters and at most one space");
+            }
+    }
     },
     lastName:{
         type:String,
-        required:true
+        trim:true,
+        minlength:3,
+        maxlength:50,
+        validate(value){
+            if(!/^[a-zA-Z]+$/.test(value)){
+                throw new Error("Last name must contain only letters");
+            }
+        }
     },
     age:{
-        type:Number
+        type:Number,
+        min:18
     },
     email:{
         type:String,
         required:true,
-        unique:true
-    },
+        unique:true,
+        trim:true,
+        lowercase:true,
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
+        validate: {
+        validator: async function (value) {
+        const user = await mongoose.models.User.findOne({ email: value });
+        // Only throw error if a different user already has this email
+        return !user || user._id.equals(this._id); // Allow update on the same user
+        },
+        message: 'Email already registered'
+    }
+},
     password:{
         type:String,
-        required:true
+        required:true,
+        match: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.']
     },
     gender:{
-        type:String
-    }
+        type:String,
+        enum:['male','female','other','Female','Male','Other']
+    },
+    photo:{
+        type:String,
+        default:"https://www.freepik.com/free-vector/illustration-businessman_2606517.htm#fromView=keyword&page=1&position=26&uuid=90040bad-21f6-452e-a5cd-c9ccdd2f1d29&query=Profile+Avatar" // Default profile picture URL
+    },
+    skills:[String], // Array of skills
+},{
+    timestamps:true // Automatically manage createdAt and updatedAt fields in the database
 });
 
 const User=mongoose.model('User',userSchema);
