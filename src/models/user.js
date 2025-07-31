@@ -1,5 +1,5 @@
 const mongoose=require('mongoose');
-
+const validator=require("validator");
 const userSchema=new mongoose.Schema({
     firstName:{
         type:String,
@@ -33,7 +33,11 @@ const userSchema=new mongoose.Schema({
         unique:true,
         trim:true,
         lowercase:true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Enter a valid email address");
+            }
+        },
         validate: {
         validator: async function (value) {
         const user = await mongoose.models.User.findOne({ email: value });
@@ -46,7 +50,11 @@ const userSchema=new mongoose.Schema({
     password:{
         type:String,
         required:true,
-        match: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.']
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.");
+            }
+        },
     },
     gender:{
         type:String,
@@ -54,7 +62,12 @@ const userSchema=new mongoose.Schema({
     },
     photo:{
         type:String,
-        default:"https://www.freepik.com/free-vector/illustration-businessman_2606517.htm#fromView=keyword&page=1&position=26&uuid=90040bad-21f6-452e-a5cd-c9ccdd2f1d29&query=Profile+Avatar" // Default profile picture URL
+        default:"https://www.freepik.com/free-vector/illustration-businessman_2606517.htm#fromView=keyword&page=1&position=26&uuid=90040bad-21f6-452e-a5cd-c9ccdd2f1d29&query=Profile+Avatar", // Default profile picture URL,
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Enter a valid URL");
+            }
+        },
     },
     about:{
         type:String,
