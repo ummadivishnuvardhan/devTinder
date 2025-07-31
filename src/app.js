@@ -74,14 +74,23 @@ app.post("/signup", async (req, res) => {
 });
 
 //Updating a user in the dataBase
-app.patch("/updateUser", async (req, res) => {
-    const userId=req.body.userId;
-    const updateData = req.body; // Assuming updateData contains the fields to be updated
+app.patch("/updateUser/:userId", async (req, res) => {
+    const userId = req.params?.userId;
+    const data = req.body; // Assuming updateData contains the fields to be updated
     
     try{
-        const user = await User.findByIdAndUpdate(userId, updateData,{new: true});
-        validators:true;
-        if(!user){
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills","firstName","lastName"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+    ALLOWED_UPDATES.includes(k)
+    );
+
+    if (!isUpdateAllowed) {
+    throw new Error("Update not allowed");
+    }
+
+    const user = await User.findByIdAndUpdate(userId, data,{runValidators: true});
+   
+    if(!user){
             return res.status(404).send("Something went wrong,No user found");
         }
         console.log("User updated successfully:", user);

@@ -56,7 +56,19 @@ const userSchema=new mongoose.Schema({
         type:String,
         default:"https://www.freepik.com/free-vector/illustration-businessman_2606517.htm#fromView=keyword&page=1&position=26&uuid=90040bad-21f6-452e-a5cd-c9ccdd2f1d29&query=Profile+Avatar" // Default profile picture URL
     },
-    skills:[String], // Array of skills
+    about:{
+        type:String,
+        default:"Hey there! I'm using DevTinder to connect with like-minded individuals and explore new opportunities. Let's chat and see where it goes!" // Default
+    },
+    skills:{
+        type:[String], // Array of strings for skills
+        validate: {
+            validator: function(v) {
+                return v.length <= 10; // Limit to 10 skills
+            },
+            message: 'You can only have up to 10 skills.'
+        }
+    }, // Array of skills
 },{
     timestamps:true // Automatically manage createdAt and updatedAt fields in the database
 });
