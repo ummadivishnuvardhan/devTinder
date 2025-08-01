@@ -1,23 +1,30 @@
-const checkadmin=(req,res,next)=>{
-const auth="xyz";
-if(auth==="xyz"){
-    next();
-}
-else{
-    res.status(401).send("Unauthorized access");
-}
-}
-const checkuser=(req,res,next)=>{
-const auth="xyz";
+const jsonwebtoken = require("jsonwebtoken");
+const User = require("../models/user");
 
-if(auth==="xyz"){
-    next();
+const userAuth = async (req,res,next)=>{
+    try{
+        const cookies = req.cookies;
+        const token = cookies.token;
+        if(!token){
+            throw new Error("Invalid Token");
+        }
+        const decodedMessage = await jsonwebtoken.verify(token,"DEV@Tinder$790");
+        const {_id} = decodedMessage;
+
+        // Find the user by ID
+        const user = await User.findById(_id);
+        if(!user){
+            throw new Error("User not found");
+        }
+
+        // Attach user to request object
+        req.user = user;
+        next();
+    }catch(error){
+        res.status(400).send({"Error":error.message});
+    }
 }
-else{
-    res.status(401).send("Unauthorized access");
-}
-}
+ 
 module.exports={
-    checkadmin,
-    checkuser
+   userAuth,
 }
