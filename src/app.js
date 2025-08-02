@@ -1,10 +1,6 @@
 const express = require("express");
 const connectDB = require("./config/database");
-const User = require("./models/user");
-const {validateSignUpData,validateLoginData} = require("./utils/validator");
-const {userAuth} = require("./middleware/auth");
-const bcrypt=require("bcrypt");
-const jsonwebtoken = require("jsonwebtoken");
+
 const cookieParser=require("cookie-parser");
 
 const app = express();
@@ -12,7 +8,14 @@ const app = express();
 app.use(express.json()); // Required to parse JSON body from requests
 app.use(cookieParser()); // Required to parse cookies from requests
 
+const authRouter = require("./routes/auth");
+const requestRouter = require("./routes/requests");
+const profileRouter = require("./routes/profile");
 
+
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestRouter);
 
 //finding a single user from the dataBase by emailId
 app.get("/feedbyemailid",async (req,res)=>{
@@ -68,34 +71,7 @@ app.delete("/deleteUser",async (req,res)=>{
     }
 })
 
-//Adding a new User to the dataBase
-app.post("/signup", async (req, res) => {
-    
-    // Assuming req.body contains user data, you can create a new user instance
-    try {
-        //validating the signUp data
-        validateSignUpData(req); 
 
-        const {firstName,lastName,age,email,password} = req.body;
-
-        // Hashing the password before saving it to the database
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-
-        const user = new User({
-            firstName,
-            lastName,
-            age,
-            email,
-            password: hashedPassword,
-        });
-
-        await user.save();
-        res.send("User created Successfully");
-    } catch (error) {
-        res.status(500).send("Error " + error.message);
-    }
-});
 
 
 //Updating a user in the dataBase
@@ -126,58 +102,9 @@ app.patch("/updateUser/:userId", async (req, res) => {
     }
 });
 
-app.post("/login",async (req,res)=>{
-    try{
-       const {email,password}=req.body;
-       validateLoginData(req);
-        
-        const user=await User.findOne({email:email});
-        if(!user){
-            throw new Error("Invalid credentials");
-        }
 
-        const  isPasswordValid=await user.validatePassword(password);
-        if(isPasswordValid){
-           //create a JWT Token
 
-           //Add the token to the user's cookies
-           const token =await user.getJWT();
-            res.cookie("token",token,{
-                expires: new Date(Date.now() + 3600000), // 1 hour
-            });
-            res.send("Login Successfull");
-        }
-        else{
 
-            throw new Error("Invalid credentials");
-          
-        }
-    }catch(error){
-        res.status(400).send("Error:"+error.message);
-    }
-})
-
-app.get("/profile",userAuth,async(req,res)=>{
-    // Assuming you want to return the profile of the logged-in user
-    try{
-        const user=req.user;
-        if(!user){
-            throw new Error("User not found");
-        }
-      
-        res.send(user);
-    }catch(error){
-        console.error("Error reading cookies:", error);
-        res.status(500).send("Error reading cookies");
-    }
-})
-
-app.get("/sendConnectionRequest",userAuth, async (req,res)=>{
-//const userId = req.userId; // Assuming the user ID is passed as a query parameter
-    const user = req.user; // The authenticated user
-
-    res.send("Connection request sent to user with ID: " + user.firstName);
-});
 
 connectDB()
     .then(() => {
